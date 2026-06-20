@@ -1,0 +1,12 @@
+#!/bin/sh
+set -e
+
+echo "==> Formatting Go files..."
+unformatted=$(gofmt -l ./cmd/ ./internal/)
+if [ -n "$unformatted" ]; then
+	gofmt -w ./cmd/ ./internal/
+	echo "    Formatted: $unformatted"
+fi
+
+echo "==> Running go vet..."
+go vet ./...

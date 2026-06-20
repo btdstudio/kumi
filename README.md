@@ -62,6 +62,14 @@ goph db migrate  # goose up
 goph dev         # air hot-reload server
 ```
 
+### Git hooks
+
+Generated projects include `.githooks/pre-commit` that formats code and runs `go vet` before each commit. Enable it:
+
+```bash
+git config core.hooksPath .githooks
+```
+
 ## Generated Stack
 
 - **Language:** Go 1.22+

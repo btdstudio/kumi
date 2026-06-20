@@ -66,7 +66,11 @@ func ScaffoldRoot(fsys embed.FS, root, targetDir, moduleName string) error {
 			return os.WriteFile(targetPath, []byte(contentStr), 0644)
 		}
 
-		return os.WriteFile(targetPath, content, 0644)
+		mode := os.FileMode(0644)
+		if ext == ".sh" {
+			mode = 0755
+		}
+		return os.WriteFile(targetPath, content, mode)
 	})
 }
 
