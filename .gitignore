@@ -1,0 +1,29 @@
+# Binary
+/goph
+
+# Temp
+tmp/
+
+# Plans
+.plans/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Go
+*.test
+*.test.exe
+*.out
+/vendor/
+
+# Env
+.env
+.env.local
