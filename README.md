@@ -8,12 +8,10 @@ Scaffold production-ready Go + HTMX + Bootstrap 5 + Catppuccin web applications.
 go install github.com/briantimmer/goph/cmd/goph@latest
 ```
 
-Requires [templ](https://github.com/a-h/templ), [air](https://github.com/air-verse/air), and [goose](https://github.com/pressly/goose):
+After installing, run `goph doctor` to check and install required tools ([templ](https://github.com/a-h/templ), [air](https://github.com/air-verse/air), [goose](https://github.com/pressly/goose)):
 
 ```bash
-go install github.com/a-h/templ/cmd/templ@latest
-go install github.com/air-verse/air@latest
-go install github.com/pressly/goose/v3/cmd/goose@latest
+goph doctor --install
 ```
 
 ## Usage
@@ -44,7 +42,7 @@ Generated projects require these environment variables:
 cd myapp
 export DATABASE_URL="postgres://user:pass@localhost:5432/myapp?sslmode=disable"
 export SECRET_KEY="dev-secret-key-change-in-production"
-goph init
+goph db migrate
 ```
 
 ### Start development server
@@ -60,7 +58,7 @@ Starts air with hot-reload on port 8080.
 ### Inside a generated project
 
 ```bash
-goph init        # goose up
+goph db migrate  # goose up
 goph dev         # air hot-reload server
 ```
 

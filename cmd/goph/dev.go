@@ -41,6 +41,10 @@ Examples:
 			return fmt.Errorf("no .air.toml found at %s (not a goph project?)", absDir)
 		}
 
+		if !findBinary("air") {
+			return fmt.Errorf("air not found — run 'goph doctor --install' or 'go install github.com/air-verse/air@latest'")
+		}
+
 		fmt.Printf("  Starting dev server in %s ...\n", absDir)
 
 		air := exec.Command("air")

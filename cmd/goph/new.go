@@ -72,8 +72,8 @@ Examples:
 		fmt.Println("  Done! To get started:")
 		fmt.Println()
 		fmt.Printf("    cd %s\n", name)
-		fmt.Println("    goph init    # run database migrations")
-		fmt.Println("    goph dev     # start development server")
+		fmt.Println("    goph db migrate    # run database migrations")
+		fmt.Println("    goph dev           # start development server")
 		fmt.Println()
 		return nil
 	},

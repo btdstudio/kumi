@@ -10,12 +10,17 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(initCmd)
+	rootCmd.AddCommand(dbCmd)
 }
 
-var initCmd = &cobra.Command{
-	Use:   "init [directory]",
-	Short: "Run database migrations in a goph project",
+var dbCmd = &cobra.Command{
+	Use:   "db <command>",
+	Short: "Manage database",
+}
+
+var migrateCmd = &cobra.Command{
+	Use:   "migrate [directory]",
+	Short: "Run database migrations",
 	Long: `Runs goose database migrations (goose up) in the specified directory
 or the current directory.
 
@@ -23,8 +28,8 @@ This command should be run inside a goph-generated project after
 setting up the database.
 
 Examples:
-  goph init
-  goph init /path/to/project`,
+  goph db migrate
+  goph db migrate /path/to/project`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		dir := "."
@@ -54,6 +59,10 @@ Examples:
 			return fmt.Errorf("neither GOOSE_DBSTRING nor DATABASE_URL is set")
 		}
 
+		if !findBinary("goose") {
+			return fmt.Errorf("goose not found — run 'goph doctor --install' or 'go install github.com/pressly/goose/v3/cmd/goose@latest'")
+		}
+
 		fmt.Printf("  Running goose %s up in %s ...\n", driver, migrationsDir)
 
 		goose := exec.Command("goose", "-dir", migrationsDir, "up")
@@ -64,4 +73,8 @@ Examples:
 
 		return goose.Run()
 	},
+}
+
+func init() {
+	dbCmd.AddCommand(migrateCmd)
 }
