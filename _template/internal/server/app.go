@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	chimw "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/httprate"
+	"github.com/joho/godotenv"
 	"github.com/uptrace/bun"
 
 	"goph/db"
@@ -53,6 +54,8 @@ type App struct {
 }
 
 func NewApp() (*App, error) {
+	_ = godotenv.Load()
+
 	cfg := loadConfig()
 
 	bdb, sqldb, err := db.Open(cfg.DatabaseURL)

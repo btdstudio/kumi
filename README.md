@@ -27,7 +27,13 @@ This creates a project directory with auth (email/password, JWT sessions, passwo
 
 ### Environment variables
 
-Generated projects require these environment variables:
+Generated projects include `.env.example`. Copy it and fill in your values:
+
+```bash
+cp .env.example .env
+```
+
+The app automatically loads `.env` at startup. Required vars:
 
 | Variable | Required | Description |
 |---|---|---|
@@ -40,20 +46,16 @@ Generated projects require these environment variables:
 
 ```bash
 cd myapp
-export DATABASE_URL="postgres://user:pass@localhost:5432/myapp?sslmode=disable"
-export SECRET_KEY="dev-secret-key-change-in-production"
 goph db migrate
 ```
 
 ### Start development server
 
 ```bash
-export DATABASE_URL="postgres://user:pass@localhost:5432/myapp?sslmode=disable"
-export SECRET_KEY="dev-secret-key-change-in-production"
 goph dev
 ```
 
-Starts air with hot-reload on port 8080.
+Starts air with hot-reload on port 8080. Both `goph db migrate` and `goph dev` read the same environment — set vars in `.env` or export them.
 
 ### Inside a generated project
 
