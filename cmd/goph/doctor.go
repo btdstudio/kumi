@@ -10,9 +10,9 @@ import (
 )
 
 type tool struct {
-	Name    string
-	Pkg     string
-	Binary  string
+	Name   string
+	Pkg    string
+	Binary string
 }
 
 var requiredTools = []tool{
