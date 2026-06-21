@@ -1,6 +1,6 @@
 # goph
 
-Scaffold production-ready Go + HTMX + Bootstrap 5 + Catppuccin web applications.
+Scaffold production-ready Go + HTMX + Bootstrap 5 + Catppuccin (plus other themes) web applications.
 
 ## Install
 

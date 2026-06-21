@@ -75,5 +75,3 @@ Examples:
 		return goose.Run()
 	},
 }
-
-
