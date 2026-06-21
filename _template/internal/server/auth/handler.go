@@ -204,7 +204,7 @@ func (h *Handler) ForgotPasswordPost(w http.ResponseWriter, r *http.Request) {
 		token, tokErr := infrastructure.CreateToken(user.ID, h.SecretKey, 1*time.Hour)
 		if tokErr != nil {
 			h.Log.Printf("failed to create reset token: %v", tokErr)
-		} else {
+		} else if h.EmailService != nil {
 			resetURL := "http://" + r.Host + "/auth/reset-password?token=" + token
 			if sendErr := h.EmailService.Send(user.Email, "Reset your goph password",
 				"<p>Click the link below to reset your password. This link expires in 1 hour.</p>"+
@@ -213,6 +213,8 @@ func (h *Handler) ForgotPasswordPost(w http.ResponseWriter, r *http.Request) {
 			); sendErr != nil {
 				h.Log.Printf("failed to send reset email: %v", sendErr)
 			}
+		} else {
+			h.Log.Printf("email service not configured; skipping password reset email to %s", user.Email)
 		}
 	}
 
