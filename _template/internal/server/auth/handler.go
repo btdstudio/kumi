@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/uptrace/bun"
 
 	"goph/internal/infrastructure"
@@ -133,25 +132,8 @@ func (h *Handler) RegisterPost(w http.ResponseWriter, r *http.Request) {
 
 	strength := infrastructure.CheckPasswordStrength(password)
 	if !strength.IsValid {
-		var missing []string
-		if !strength.HasMinLength {
-			missing = append(missing, "at least 12 characters")
-		}
-		if !strength.HasUppercase {
-			missing = append(missing, "an uppercase letter")
-		}
-		if !strength.HasLowercase {
-			missing = append(missing, "a lowercase letter")
-		}
-		if !strength.HasDigit {
-			missing = append(missing, "a number")
-		}
-		if !strength.HasSpecial {
-			missing = append(missing, "a special character")
-		}
-		msg := "Password must include " + strings.Join(missing, ", ") + "."
 		w.WriteHeader(http.StatusBadRequest)
-		auth.Error(msg).Render(r.Context(), w)
+		auth.Error(strength.Error()).Render(r.Context(), w)
 		return
 	}
 
@@ -256,25 +238,8 @@ func (h *Handler) ResetPasswordPost(w http.ResponseWriter, r *http.Request) {
 
 	strength := infrastructure.CheckPasswordStrength(password)
 	if !strength.IsValid {
-		var missing []string
-		if !strength.HasMinLength {
-			missing = append(missing, "at least 12 characters")
-		}
-		if !strength.HasUppercase {
-			missing = append(missing, "an uppercase letter")
-		}
-		if !strength.HasLowercase {
-			missing = append(missing, "a lowercase letter")
-		}
-		if !strength.HasDigit {
-			missing = append(missing, "a number")
-		}
-		if !strength.HasSpecial {
-			missing = append(missing, "a special character")
-		}
-		msg := "Password must include " + strings.Join(missing, ", ") + "."
 		w.WriteHeader(http.StatusBadRequest)
-		auth.Error(msg).Render(r.Context(), w)
+		auth.Error(strength.Error()).Render(r.Context(), w)
 		return
 	}
 
@@ -319,13 +284,5 @@ func (h *Handler) ResetPasswordPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) createSessionToken(user *models.User) (string, error) {
-	claims := middleware.Claims{
-		Email:       user.Email,
-		DisplayName: user.DisplayName,
-		Theme:       user.Theme,
-		RegisteredClaims: jwt.RegisteredClaims{
-			Subject: user.ID,
-		},
-	}
-	return middleware.CreateSessionToken(h.SecretKey, &claims)
+	return middleware.CreateSessionToken(h.SecretKey, middleware.ClaimsFromUser(user))
 }

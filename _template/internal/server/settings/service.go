@@ -36,11 +36,7 @@ func VerifyEmailConfirmToken(secretKey, token string) (*emailConfirmData, error)
 	return &data, nil
 }
 
-type EmailService interface {
-	Send(to, subject, html string) error
-}
-
-func SendConfirmationEmail(svc EmailService, to, confirmURL string) error {
+func SendConfirmationEmail(svc infrastructure.EmailService, to, confirmURL string) error {
 	if svc == nil {
 		return nil
 	}

@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/uptrace/bun"
 
 	"goph/internal/infrastructure"
@@ -142,14 +141,7 @@ func (h *Handler) ProfilePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newToken, err := middleware.CreateSessionToken(h.SecretKey, &middleware.Claims{
-		Email:       user.Email,
-		DisplayName: user.DisplayName,
-		Theme:       user.Theme,
-		RegisteredClaims: jwt.RegisteredClaims{
-			Subject: user.ID,
-		},
-	})
+	newToken, err := middleware.CreateSessionToken(h.SecretKey, middleware.ClaimsFromUser(user))
 	if err != nil {
 		log.Printf("CreateSessionToken failed: %v (user.ID=%q user.Email=%q)", err, user.ID, user.Email)
 	} else {
@@ -287,24 +279,8 @@ func (h *Handler) PasswordPost(w http.ResponseWriter, r *http.Request) {
 
 	strength := infrastructure.CheckPasswordStrength(newPw)
 	if !strength.IsValid {
-		var missing []string
-		if !strength.HasMinLength {
-			missing = append(missing, "at least 12 characters")
-		}
-		if !strength.HasUppercase {
-			missing = append(missing, "an uppercase letter")
-		}
-		if !strength.HasLowercase {
-			missing = append(missing, "a lowercase letter")
-		}
-		if !strength.HasDigit {
-			missing = append(missing, "a number")
-		}
-		if !strength.HasSpecial {
-			missing = append(missing, "a special character")
-		}
 		w.WriteHeader(http.StatusBadRequest)
-		views.Error("Password must include " + strings.Join(missing, ", ") + ".").Render(r.Context(), w)
+		views.Error(strength.Error()).Render(r.Context(), w)
 		return
 	}
 
