@@ -1,15 +1,13 @@
 package infrastructure
 
 import (
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"regexp"
+	"strings"
 	"time"
 	"unicode"
 
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -50,6 +48,26 @@ func CheckPasswordStrength(password string) PasswordStrength {
 	return s
 }
 
+func (s PasswordStrength) Error() string {
+	var missing []string
+	if !s.HasMinLength {
+		missing = append(missing, "at least 12 characters")
+	}
+	if !s.HasUppercase {
+		missing = append(missing, "an uppercase letter")
+	}
+	if !s.HasLowercase {
+		missing = append(missing, "a lowercase letter")
+	}
+	if !s.HasDigit {
+		missing = append(missing, "a number")
+	}
+	if !s.HasSpecial {
+		missing = append(missing, "a special character")
+	}
+	return "Password must include " + strings.Join(missing, ", ") + "."
+}
+
 func HashPassword(plain string) (string, error) {
 	b, err := bcrypt.GenerateFromPassword([]byte(plain), bcrypt.DefaultCost)
 	if err != nil {
@@ -63,52 +81,26 @@ func CheckPassword(plain, hashed string) bool {
 	return err == nil
 }
 
-type timedToken struct {
-	Data string `json:"data"`
-	Exp  int64  `json:"exp"`
-}
-
 func CreateToken(data, secret string, ttl time.Duration) (string, error) {
-	t := timedToken{
-		Data: data,
-		Exp:  time.Now().Add(ttl).Unix(),
+	claims := jwt.MapClaims{
+		"data": data,
+		"exp":  time.Now().Add(ttl).Unix(),
 	}
-	payload, err := json.Marshal(t)
-	if err != nil {
-		return "", fmt.Errorf("marshal token: %w", err)
-	}
-	mac := hmac.New(sha256.New, []byte(secret))
-	mac.Write(payload)
-	sig := mac.Sum(nil)
-	combined := append(payload, sig...)
-	return base64.URLEncoding.EncodeToString(combined), nil
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(secret))
 }
 
 func VerifyToken(token, secret string) (string, error) {
-	raw, err := base64.URLEncoding.DecodeString(token)
+	claims := jwt.MapClaims{}
+	_, err := jwt.ParseWithClaims(token, claims, func(t *jwt.Token) (any, error) {
+		return []byte(secret), nil
+	})
 	if err != nil {
-		return "", fmt.Errorf("decode token: %w", err)
+		return "", err
 	}
-	if len(raw) < sha256.Size {
-		return "", fmt.Errorf("token too short")
+	data, _ := claims["data"].(string)
+	if data == "" {
+		return "", fmt.Errorf("invalid token")
 	}
-	payload := raw[:len(raw)-sha256.Size]
-	sig := raw[len(raw)-sha256.Size:]
-
-	mac := hmac.New(sha256.New, []byte(secret))
-	mac.Write(payload)
-	expected := mac.Sum(nil)
-
-	if !hmac.Equal(sig, expected) {
-		return "", fmt.Errorf("invalid signature")
-	}
-
-	var t timedToken
-	if err := json.Unmarshal(payload, &t); err != nil {
-		return "", fmt.Errorf("unmarshal token: %w", err)
-	}
-	if time.Now().Unix() > t.Exp {
-		return "", fmt.Errorf("token expired")
-	}
-	return t.Data, nil
+	return data, nil
 }
