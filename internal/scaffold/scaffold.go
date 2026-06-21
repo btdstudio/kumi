@@ -74,14 +74,6 @@ func ScaffoldRoot(fsys embed.FS, root, targetDir, moduleName string) error {
 	})
 }
 
-func GoModInit(targetDir, moduleName string) error {
-	cmd := exec.Command("go", "mod", "init", moduleName)
-	cmd.Dir = targetDir
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
-}
-
 func GoModTidy(targetDir string) error {
 	cmd := exec.Command("go", "mod", "tidy")
 	cmd.Dir = targetDir

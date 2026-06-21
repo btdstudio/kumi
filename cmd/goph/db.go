@@ -11,6 +11,7 @@ import (
 
 func init() {
 	rootCmd.AddCommand(dbCmd)
+	dbCmd.AddCommand(migrateCmd)
 }
 
 var dbCmd = &cobra.Command{
@@ -75,6 +76,4 @@ Examples:
 	},
 }
 
-func init() {
-	dbCmd.AddCommand(migrateCmd)
-}
+

@@ -106,14 +106,15 @@ func RequireAuth(next http.Handler) http.Handler {
 	})
 }
 
-func RequireAuthAPI(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if UserFromContext(r.Context()) == nil {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-		next.ServeHTTP(w, r)
-	})
+func ClaimsFromUser(user *models.User) *Claims {
+	return &Claims{
+		Email:       user.Email,
+		DisplayName: user.DisplayName,
+		Theme:       user.Theme,
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject: user.ID,
+		},
+	}
 }
 
 func CreateSessionToken(secretKey string, claims *Claims) (string, error) {
