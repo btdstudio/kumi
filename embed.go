@@ -2,5 +2,5 @@ package goph
 
 import "embed"
 
-//go:embed _template
+//go:embed all:_template
 var TemplateFS embed.FS

@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -43,6 +45,8 @@ Examples:
 			return fmt.Errorf("invalid directory: %w", err)
 		}
 
+		loadEnv(absDir)
+
 		migrationsDir := filepath.Join(absDir, "migrations")
 		if _, err := os.Stat(migrationsDir); os.IsNotExist(err) {
 			return fmt.Errorf("no migrations directory found at %s", migrationsDir)
@@ -74,4 +78,37 @@ Examples:
 
 		return goose.Run()
 	},
+}
+
+func loadEnv(dir string) {
+	envFile := filepath.Join(dir, ".env")
+	file, err := os.Open(envFile)
+	if err != nil {
+		return
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		parts := strings.SplitN(line, "=", 2)
+		if len(parts) != 2 {
+			continue
+		}
+		key := strings.TrimSpace(parts[0])
+		val := strings.TrimSpace(parts[1])
+
+		if len(val) >= 2 {
+			if (val[0] == '"' && val[len(val)-1] == '"') || (val[0] == '\'' && val[len(val)-1] == '\'') {
+				val = val[1 : len(val)-1]
+			}
+		}
+
+		if os.Getenv(key) == "" {
+			os.Setenv(key, val)
+		}
+	}
 }

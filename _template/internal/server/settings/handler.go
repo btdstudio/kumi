@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/base64"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 

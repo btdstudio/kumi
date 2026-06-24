@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-//go:embed testdata
+//go:embed all:testdata
 var testFS embed.FS
 
 func TestScaffold_NoModuleSubstitution(t *testing.T) {
@@ -96,7 +96,7 @@ func TestScaffold_DirectoryCreated(t *testing.T) {
 	for i, e := range entries {
 		names[i] = e.Name()
 	}
-	expected := []string{"go.mod", "main.go", "static"}
+	expected := []string{"go.mod", "main.go", "static", ".testfile"}
 	for _, e := range expected {
 		found := false
 		for _, n := range names {
