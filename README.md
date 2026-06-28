@@ -8,6 +8,20 @@ Scaffold production-ready Go + HTMX + Bootstrap 5 + Catppuccin (plus other theme
 go install github.com/briantimmer/goph/cmd/goph@latest
 ```
 
+### Keeping it updated
+To get the latest bugfixes and features, simply re-run:
+```bash
+go install github.com/briantimmer/goph/cmd/goph@latest
+```
+
+### Shell Path Setup
+If the `goph` command is not recognized after running the installation, make sure Go's binary directory is added to your shell's `$PATH` variable:
+
+```bash
+# Add Go binary path to Zsh profile (macOS default):
+echo 'export PATH=$PATH:$(go env GOPATH)/bin' >> ~/.zshrc && source ~/.zshrc
+```
+
 After installing, run `goph doctor` to check and install required tools ([templ](https://github.com/a-h/templ), [air](https://github.com/air-verse/air), [goose](https://github.com/pressly/goose)):
 
 ```bash
