@@ -20,16 +20,16 @@ func NewHandler(db *bun.DB, sqldb *sql.DB) *Handler {
 }
 
 type pageData struct {
-	Title              string
-	PageTitle          string
-	BsTheme            string
-	Theme              string
-	DisplayName        string
-	Email              string
-	AvatarURL          string
-	CSRFToken          string
-	NavExtraClass      string
-	IsAuthenticated    bool
+	Title           string
+	PageTitle       string
+	BsTheme         string
+	Theme           string
+	DisplayName     string
+	Email           string
+	AvatarURL       string
+	CSRFToken       string
+	NavExtraClass   string
+	IsAuthenticated bool
 }
 
 func renderPage(w http.ResponseWriter, r *http.Request, data pageData) {

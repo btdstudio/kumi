@@ -154,5 +154,3 @@ func (app *App) mountRoutes() {
 func init() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 }
-
-

@@ -1,11 +1,17 @@
 #!/bin/sh
 set -e
 
-echo "==> Formatting Go files..."
-unformatted=$(gofmt -l ./cmd/ ./internal/)
+echo "==> Checking Go file formatting..."
+unformatted=$(gofmt -l .)
 if [ -n "$unformatted" ]; then
-	gofmt -w ./cmd/ ./internal/
-	echo "    Formatted: $unformatted"
+	echo "Error: The following Go files are not formatted correctly:"
+	echo "$unformatted"
+	echo ""
+	echo "Auto-formatting files..."
+	# Format the files on disk
+	gofmt -w $unformatted
+	echo "Files formatted. Please stage the changes (git add) and try committing again."
+	exit 1
 fi
 
 echo "==> Running go vet..."

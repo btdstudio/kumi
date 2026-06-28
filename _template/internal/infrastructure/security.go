@@ -21,12 +21,12 @@ var passwordPatterns = map[string]*regexp.Regexp{
 }
 
 type PasswordStrength struct {
-	IsValid       bool
-	HasMinLength  bool
-	HasUppercase  bool
-	HasLowercase  bool
-	HasDigit      bool
-	HasSpecial    bool
+	IsValid      bool
+	HasMinLength bool
+	HasUppercase bool
+	HasLowercase bool
+	HasDigit     bool
+	HasSpecial   bool
 }
 
 func CheckPasswordStrength(password string) PasswordStrength {

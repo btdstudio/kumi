@@ -37,10 +37,10 @@ var themes = func() map[string]string {
 }()
 
 type Handler struct {
-	DB              *bun.DB
-	SQLDB           *sql.DB
-	SecretKey       string
-	EmailService    infrastructure.EmailService
+	DB           *bun.DB
+	SQLDB        *sql.DB
+	SecretKey    string
+	EmailService infrastructure.EmailService
 }
 
 func NewHandler(db *bun.DB, sqldb *sql.DB, secretKey string, emailSvc infrastructure.EmailService) *Handler {
