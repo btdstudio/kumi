@@ -5,13 +5,13 @@ Scaffold production-ready Go + HTMX + Bootstrap 5 + Catppuccin (plus other theme
 ## Install
 
 ```bash
-go install github.com/briantimmer/goph/cmd/goph@latest
+go install github.com/btdstudio/goph/cmd/goph@latest
 ```
 
 ### Keeping it updated
 To get the latest bugfixes and features, simply re-run:
 ```bash
-go install github.com/briantimmer/goph/cmd/goph@latest
+go install github.com/btdstudio/goph/cmd/goph@latest
 ```
 
 ### Shell Path Setup

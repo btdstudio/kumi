@@ -1,4 +1,4 @@
-module github.com/briantimmer/goph
+module github.com/btdstudio/goph
 
 go 1.26.4
 
