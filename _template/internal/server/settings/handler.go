@@ -40,14 +40,16 @@ type Handler struct {
 	DB           *bun.DB
 	SQLDB        *sql.DB
 	SecretKey    string
+	BaseURL      string
 	EmailService infrastructure.EmailService
 }
 
-func NewHandler(db *bun.DB, sqldb *sql.DB, secretKey string, emailSvc infrastructure.EmailService) *Handler {
+func NewHandler(db *bun.DB, sqldb *sql.DB, secretKey, baseURL string, emailSvc infrastructure.EmailService) *Handler {
 	return &Handler{
 		DB:           db,
 		SQLDB:        sqldb,
 		SecretKey:    secretKey,
+		BaseURL:      baseURL,
 		EmailService: emailSvc,
 	}
 }
@@ -146,7 +148,7 @@ func (h *Handler) ProfilePost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("CreateSessionToken failed: %v (user.ID=%q user.Email=%q)", err, user.ID, user.Email)
 	} else {
-		middleware.SetSessionCookie(w, newToken)
+		middleware.SetSessionCookie(w, newToken, middleware.IsHTTPS(h.BaseURL))
 	}
 
 	w.Header().Set("HX-Redirect", "/settings/?flash=success&msg=Profile+updated.")
@@ -210,7 +212,7 @@ func (h *Handler) EmailPost(w http.ResponseWriter, r *http.Request) {
 
 	token, err := CreateEmailConfirmToken(h.SecretKey, user.ID, email)
 	if err == nil {
-		confirmURL := "http://" + r.Host + "/settings/confirm-email/" + token
+		confirmURL := h.BaseURL + "/settings/confirm-email/" + token
 		SendConfirmationEmail(h.EmailService, email, confirmURL)
 	}
 
@@ -332,7 +334,7 @@ func (h *Handler) ThemePost(w http.ResponseWriter, r *http.Request) {
 	claims.Theme = theme
 	newToken, err := middleware.CreateSessionToken(h.SecretKey, claims)
 	if err == nil {
-		middleware.SetSessionCookie(w, newToken)
+		middleware.SetSessionCookie(w, newToken, middleware.IsHTTPS(h.BaseURL))
 	}
 
 	w.Header().Set("HX-Trigger", "theme-updated")

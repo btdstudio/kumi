@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -63,7 +64,7 @@ func LoadUserProfile(db *bun.DB) func(http.Handler) http.Handler {
 	}
 }
 
-func JWTAuth(secretKey string) func(http.Handler) http.Handler {
+func JWTAuth(secretKey string, secureCookies bool) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			cookie, err := r.Cookie(SessionCookieName)
@@ -78,14 +79,7 @@ func JWTAuth(secretKey string) func(http.Handler) http.Handler {
 			}, jwt.WithLeeway(30*time.Second))
 
 			if err != nil || !token.Valid {
-				http.SetCookie(w, &http.Cookie{
-					Name:     SessionCookieName,
-					Value:    "",
-					Path:     "/",
-					MaxAge:   -1,
-					HttpOnly: true,
-					SameSite: http.SameSiteLaxMode,
-				})
+				ClearSessionCookie(w, secureCookies)
 				next.ServeHTTP(w, r)
 				return
 			}
@@ -128,13 +122,31 @@ func CreateSessionToken(secretKey string, claims *Claims) (string, error) {
 	return token.SignedString([]byte(secretKey))
 }
 
-func SetSessionCookie(w http.ResponseWriter, token string) {
+func SetSessionCookie(w http.ResponseWriter, token string, secure bool) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     SessionCookieName,
 		Value:    token,
 		Path:     "/",
 		HttpOnly: true,
+		Secure:   secure,
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   14 * 24 * 3600,
 	})
+}
+
+func ClearSessionCookie(w http.ResponseWriter, secure bool) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     SessionCookieName,
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+		Secure:   secure,
+		SameSite: http.SameSiteLaxMode,
+	})
+}
+
+// IsHTTPS reports whether baseURL uses the https scheme.
+func IsHTTPS(baseURL string) bool {
+	return strings.HasPrefix(strings.ToLower(baseURL), "https://")
 }

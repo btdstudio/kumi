@@ -26,7 +26,8 @@ jobs:
 
     env:
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/goph_test?sslmode=disable
-      SECRET_KEY: test-secret-do-not-use-in-production
+      SECRET_KEY: test-secret-do-not-use-in-production-0123456789
+      BASE_URL: http://localhost:8080
       RESEND_API_KEY: re_test
 
     steps:

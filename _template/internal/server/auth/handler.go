@@ -20,15 +20,17 @@ type Handler struct {
 	DB           *bun.DB
 	SQLDB        *sql.DB
 	SecretKey    string
+	BaseURL      string
 	EmailService infrastructure.EmailService
 	Log          *log.Logger
 }
 
-func NewHandler(db *bun.DB, sqldb *sql.DB, secretKey string, emailSvc infrastructure.EmailService) *Handler {
+func NewHandler(db *bun.DB, sqldb *sql.DB, secretKey, baseURL string, emailSvc infrastructure.EmailService) *Handler {
 	return &Handler{
 		DB:           db,
 		SQLDB:        sqldb,
 		SecretKey:    secretKey,
+		BaseURL:      baseURL,
 		EmailService: emailSvc,
 		Log:          log.Default(),
 	}
@@ -101,7 +103,7 @@ func (h *Handler) LoginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	middleware.SetSessionCookie(w, token)
+	middleware.SetSessionCookie(w, token, middleware.IsHTTPS(h.BaseURL))
 	w.Header().Set("HX-Redirect", "/dashboard")
 	w.WriteHeader(http.StatusNoContent)
 }
@@ -164,20 +166,13 @@ func (h *Handler) RegisterPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	middleware.SetSessionCookie(w, token)
+	middleware.SetSessionCookie(w, token, middleware.IsHTTPS(h.BaseURL))
 	w.Header().Set("HX-Redirect", "/dashboard")
 	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *Handler) LogoutPost(w http.ResponseWriter, r *http.Request) {
-	http.SetCookie(w, &http.Cookie{
-		Name:     middleware.SessionCookieName,
-		Value:    "",
-		Path:     "/",
-		MaxAge:   -1,
-		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
-	})
+	middleware.ClearSessionCookie(w, middleware.IsHTTPS(h.BaseURL))
 	http.Redirect(w, r, "/auth/login", http.StatusFound)
 }
 
@@ -205,7 +200,7 @@ func (h *Handler) ForgotPasswordPost(w http.ResponseWriter, r *http.Request) {
 		if tokErr != nil {
 			h.Log.Printf("failed to create reset token: %v", tokErr)
 		} else if h.EmailService != nil {
-			resetURL := "http://" + r.Host + "/auth/reset-password?token=" + token
+			resetURL := h.BaseURL + "/auth/reset-password?token=" + token
 			if sendErr := h.EmailService.Send(user.Email, "Reset your goph password",
 				"<p>Click the link below to reset your password. This link expires in 1 hour.</p>"+
 					"<p><a href=\""+resetURL+"\">"+resetURL+"</a></p>"+

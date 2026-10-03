@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -21,30 +20,6 @@ import (
 	"goph/middleware"
 )
 
-type Config struct {
-	DatabaseURL  string
-	SecretKey    string
-	ResendAPIKey string
-	MailFromAddr string
-}
-
-func loadConfig() Config {
-	return Config{
-		DatabaseURL:  requireEnv("DATABASE_URL"),
-		SecretKey:    requireEnv("SECRET_KEY"),
-		ResendAPIKey: os.Getenv("RESEND_API_KEY"),
-		MailFromAddr: os.Getenv("MAIL_FROM_ADDRESS"),
-	}
-}
-
-func requireEnv(key string) string {
-	val := os.Getenv(key)
-	if val == "" {
-		log.Fatalf("required environment variable %q is not set", key)
-	}
-	return val
-}
-
 type App struct {
 	Router       chi.Router
 	Config       Config
@@ -56,7 +31,10 @@ type App struct {
 func NewApp() (*App, error) {
 	_ = godotenv.Load()
 
-	cfg := loadConfig()
+	cfg, err := loadConfig()
+	if err != nil {
+		return nil, err
+	}
 
 	bdb, sqldb, err := db.Open(cfg.DatabaseURL)
 	if err != nil {
@@ -70,12 +48,16 @@ func NewApp() (*App, error) {
 	r := chi.NewRouter()
 
 	r.Use(chimw.RequestID)
-	r.Use(chimw.RealIP)
+	if cfg.TrustProxy {
+		// Only safe behind a reverse proxy that overwrites X-Forwarded-For /
+		// X-Real-IP; otherwise clients can spoof their IP and evade rate limits.
+		r.Use(chimw.RealIP)
+	}
 	r.Use(chimw.Logger)
 	r.Use(chimw.Recoverer)
 	r.Use(securityHeaders)
-	r.Use(middleware.CSRFProtect([]byte(cfg.SecretKey), false))
-	r.Use(middleware.JWTAuth(cfg.SecretKey))
+	r.Use(middleware.CSRFProtect(deriveKey(cfg.SecretKey, "csrf"), cfg.SecureCookies()))
+	r.Use(middleware.JWTAuth(cfg.SecretKey, cfg.SecureCookies()))
 
 	var emailSvc infrastructure.EmailService
 	if cfg.ResendAPIKey != "" {
@@ -117,9 +99,9 @@ func securityHeaders(next http.Handler) http.Handler {
 func (app *App) mountRoutes() {
 	r := app.Router
 
-	authHandler := auth.NewHandler(app.DB, app.SQLDB, app.Config.SecretKey, app.EmailService)
+	authHandler := auth.NewHandler(app.DB, app.SQLDB, app.Config.SecretKey, app.Config.BaseURL, app.EmailService)
 	dashHandler := dashboard.NewHandler(app.DB, app.SQLDB)
-	settingsHandler := settings.NewHandler(app.DB, app.SQLDB, app.Config.SecretKey, app.EmailService)
+	settingsHandler := settings.NewHandler(app.DB, app.SQLDB, app.Config.SecretKey, app.Config.BaseURL, app.EmailService)
 
 	r.Route("/auth", func(r chi.Router) {
 		r.Get("/login", authHandler.LoginPage)

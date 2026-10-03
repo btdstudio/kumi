@@ -52,9 +52,17 @@ The app automatically loads `.env` at startup. Required vars:
 | Variable | Required | Description |
 |---|---|---|
 | `DATABASE_URL` | Yes | Postgres connection string |
-| `SECRET_KEY` | Yes | JWT signing key (any random string) |
+| `SECRET_KEY` | Yes | Signing key, at least 32 characters. Generate with `openssl rand -hex 32` |
+| `BASE_URL` | Yes | Public URL of the app (e.g. `https://example.com`). Used for links in emails; `https` also marks cookies `Secure` |
+| `TRUST_PROXY` | No | Set to `true` only behind a reverse proxy that overwrites `X-Forwarded-For`/`X-Real-IP`, so rate limits see the real client IP |
 | `RESEND_API_KEY` | No | For password reset emails |
 | `MAIL_FROM_ADDRESS` | No | Sender address for emails |
+
+### Production checklist
+
+- Generate a unique `SECRET_KEY` (`openssl rand -hex 32`); the app refuses to start with a short or placeholder key.
+- Set `BASE_URL` to your public `https://` URL so session and CSRF cookies are `Secure` and email links point at your host.
+- Terminate TLS in front of the app. If it sits behind a reverse proxy, set `TRUST_PROXY=true` and make sure the proxy overwrites `X-Forwarded-For`; never enable it when the app is directly reachable.
 
 ### Run database migrations
 
