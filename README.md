@@ -88,7 +88,7 @@ git config core.hooksPath .githooks
 
 ## Generated Stack
 
-- **Language:** Go 1.22+
+- **Language:** Go 1.26+
 - **Router:** chi/v5
 - **ORM:** bun
 - **Migrations:** goose
