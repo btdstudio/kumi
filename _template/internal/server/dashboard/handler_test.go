@@ -8,6 +8,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 
+	"goph/internal/token"
 	"goph/middleware"
 )
 
@@ -28,7 +29,7 @@ func TestDashboardPage_Authenticated(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/dashboard", nil)
 
-	claims := &middleware.Claims{
+	claims := &token.SessionClaims{
 		Email:       "test@example.com",
 		DisplayName: "Test User",
 		Theme:       "catppuccin-mocha",

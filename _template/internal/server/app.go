@@ -17,6 +17,7 @@ import (
 	"goph/internal/server/auth"
 	"goph/internal/server/dashboard"
 	"goph/internal/server/settings"
+	"goph/internal/token"
 	"goph/middleware"
 )
 
@@ -25,6 +26,7 @@ type App struct {
 	Config       Config
 	DB           *bun.DB
 	SQLDB        *sql.DB
+	Tokens       *token.Tokens
 	EmailService infrastructure.EmailService
 }
 
@@ -56,8 +58,9 @@ func NewApp() (*App, error) {
 	r.Use(chimw.Logger)
 	r.Use(chimw.Recoverer)
 	r.Use(securityHeaders)
-	r.Use(middleware.CSRFProtect(deriveKey(cfg.SecretKey, "csrf"), cfg.SecureCookies()))
-	r.Use(middleware.JWTAuth(cfg.SecretKey, cfg.SecureCookies()))
+	tokens := token.New(cfg.SecretKey)
+	r.Use(middleware.CSRFProtect(token.DeriveKey(cfg.SecretKey, "csrf"), cfg.SecureCookies()))
+	r.Use(middleware.JWTAuth(tokens, cfg.SecureCookies()))
 
 	var emailSvc infrastructure.EmailService
 	if cfg.ResendAPIKey != "" {
@@ -80,6 +83,7 @@ func NewApp() (*App, error) {
 		Config:       cfg,
 		DB:           bdb,
 		SQLDB:        sqldb,
+		Tokens:       tokens,
 		EmailService: emailSvc,
 	}
 
@@ -99,9 +103,9 @@ func securityHeaders(next http.Handler) http.Handler {
 func (app *App) mountRoutes() {
 	r := app.Router
 
-	authHandler := auth.NewHandler(app.DB, app.SQLDB, app.Config.SecretKey, app.Config.BaseURL, app.EmailService)
+	authHandler := auth.NewHandler(app.DB, app.SQLDB, app.Tokens, app.Config.BaseURL, app.EmailService)
 	dashHandler := dashboard.NewHandler(app.DB, app.SQLDB)
-	settingsHandler := settings.NewHandler(app.DB, app.SQLDB, app.Config.SecretKey, app.Config.BaseURL, app.EmailService)
+	settingsHandler := settings.NewHandler(app.DB, app.SQLDB, app.Tokens, app.Config.BaseURL, app.EmailService)
 
 	r.Route("/auth", func(r chi.Router) {
 		r.Get("/login", authHandler.LoginPage)

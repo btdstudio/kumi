@@ -5,13 +5,14 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/uptrace/bun"
 
 	"goph/internal/infrastructure"
 	"goph/internal/models"
+	"goph/internal/token"
 	"goph/internal/views/auth"
 	"goph/middleware"
 )
@@ -19,17 +20,17 @@ import (
 type Handler struct {
 	DB           *bun.DB
 	SQLDB        *sql.DB
-	SecretKey    string
+	Tokens       *token.Tokens
 	BaseURL      string
 	EmailService infrastructure.EmailService
 	Log          *log.Logger
 }
 
-func NewHandler(db *bun.DB, sqldb *sql.DB, secretKey, baseURL string, emailSvc infrastructure.EmailService) *Handler {
+func NewHandler(db *bun.DB, sqldb *sql.DB, tokens *token.Tokens, baseURL string, emailSvc infrastructure.EmailService) *Handler {
 	return &Handler{
 		DB:           db,
 		SQLDB:        sqldb,
-		SecretKey:    secretKey,
+		Tokens:       tokens,
 		BaseURL:      baseURL,
 		EmailService: emailSvc,
 		Log:          log.Default(),
@@ -196,11 +197,11 @@ func (h *Handler) ForgotPasswordPost(w http.ResponseWriter, r *http.Request) {
 	user := new(models.User)
 	err := h.DB.NewSelect().Model(user).Where("email = ?", email).Scan(r.Context())
 	if err == nil {
-		token, tokErr := infrastructure.CreateToken(user.ID, h.SecretKey, 1*time.Hour)
+		resetTok, tokErr := h.Tokens.IssueReset(user.ID)
 		if tokErr != nil {
 			h.Log.Printf("failed to create reset token: %v", tokErr)
 		} else if h.EmailService != nil {
-			resetURL := h.BaseURL + "/auth/reset-password?token=" + token
+			resetURL := h.BaseURL + "/auth/reset-password?token=" + string(resetTok)
 			if sendErr := h.EmailService.Send(user.Email, "Reset your goph password",
 				"<p>Click the link below to reset your password. This link expires in 1 hour.</p>"+
 					"<p><a href=\""+resetURL+"\">"+resetURL+"</a></p>"+
@@ -217,19 +218,19 @@ func (h *Handler) ForgotPasswordPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) ResetPasswordPage(w http.ResponseWriter, r *http.Request) {
-	token := r.URL.Query().Get("token")
+	tokenStr := r.URL.Query().Get("token")
 
-	userID, err := infrastructure.VerifyToken(token, h.SecretKey)
+	userID, err := h.Tokens.VerifyReset(token.ResetToken(tokenStr))
 	if err != nil || userID == "" {
 		auth.ResetPasswordPage(false, "", "This reset link is invalid or has expired. Please request a new one.", "").Render(r.Context(), w)
 		return
 	}
 
-	auth.ResetPasswordPage(true, token, "", middleware.CSRFToken(r)).Render(r.Context(), w)
+	auth.ResetPasswordPage(true, tokenStr, "", middleware.CSRFToken(r)).Render(r.Context(), w)
 }
 
 func (h *Handler) ResetPasswordPost(w http.ResponseWriter, r *http.Request) {
-	token := r.FormValue("token")
+	tokenStr := r.FormValue("token")
 	password := r.FormValue("password")
 	confirm := r.FormValue("confirm_password")
 
@@ -246,7 +247,7 @@ func (h *Handler) ResetPasswordPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, err := infrastructure.VerifyToken(token, h.SecretKey)
+	userID, err := h.Tokens.VerifyReset(token.ResetToken(tokenStr))
 	if err != nil || userID == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		auth.Error("Reset link is invalid or expired. Please request a new one.").Render(r.Context(), w)
@@ -281,5 +282,13 @@ func (h *Handler) ResetPasswordPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) createSessionToken(user *models.User) (string, error) {
-	return middleware.CreateSessionToken(h.SecretKey, middleware.ClaimsFromUser(user))
+	tok, err := h.Tokens.IssueSession(token.SessionClaims{
+		Email:       user.Email,
+		DisplayName: user.DisplayName,
+		Theme:       user.Theme,
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject: user.ID,
+		},
+	})
+	return string(tok), err
 }
