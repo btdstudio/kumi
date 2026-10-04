@@ -7,7 +7,7 @@
 - **Templates:** templ (`.templ` files, run `templ generate`)
 - **Frontend:** HTMX 2.x + Bootstrap 5 + Catppuccin themes
 - **Auth:** JWT session cookies (golang-jwt), bcrypt passwords
-- **Middleware:** gorilla/csrf, go-chi/httprate
+- **Middleware:** gorilla/csrf (rate limiting via go-chi/httprate in `app.go`)
 
 ## Structure
 
@@ -22,7 +22,7 @@
 | `internal/infrastructure/` | Email (Resend), security (bcrypt/HMAC/JWT), validation |
 | `internal/models/` | bun model definitions |
 | `internal/views/` | templ page components |
-| `middleware/` | JWT auth, CSRF, rate limiting |
+| `middleware/` | JWT auth, CSRF |
 | `migrations/` | goose SQL migrations |
 
 ## Conventions
