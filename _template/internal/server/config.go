@@ -1,8 +1,6 @@
 package server
 
 import (
-	"crypto/hmac"
-	"crypto/sha256"
 	"fmt"
 	"net/url"
 	"os"
@@ -88,12 +86,4 @@ func validateBaseURL(raw string) (string, error) {
 		return "", fmt.Errorf("BASE_URL must contain only scheme and host, got %q", raw)
 	}
 	return u.Scheme + "://" + u.Host, nil
-}
-
-// deriveKey returns a purpose-specific subkey so that a single SECRET_KEY is
-// never used directly for more than one cryptographic purpose.
-func deriveKey(secret, purpose string) []byte {
-	mac := hmac.New(sha256.New, []byte(secret))
-	mac.Write([]byte(purpose))
-	return mac.Sum(nil)
 }

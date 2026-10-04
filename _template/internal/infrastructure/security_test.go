@@ -2,7 +2,6 @@ package infrastructure
 
 import (
 	"testing"
-	"time"
 )
 
 func TestCheckPasswordStrength_Valid(t *testing.T) {
@@ -91,60 +90,5 @@ func TestHashPassword(t *testing.T) {
 	}
 	if CheckPassword("wrongPassword1!", hash) {
 		t.Error("CheckPassword should return false for wrong password")
-	}
-}
-
-func TestCreateAndVerifyToken(t *testing.T) {
-	secret := "test-secret-key"
-	data := "user@example.com"
-	ttl := 1 * time.Hour
-
-	token, err := CreateToken(data, secret, ttl)
-	if err != nil {
-		t.Fatalf("CreateToken failed: %v", err)
-	}
-
-	extracted, err := VerifyToken(token, secret)
-	if err != nil {
-		t.Fatalf("VerifyToken failed: %v", err)
-	}
-	if extracted != data {
-		t.Errorf("expected %q, got %q", data, extracted)
-	}
-}
-
-func TestVerifyToken_WrongSecret(t *testing.T) {
-	token, err := CreateToken("test@example.com", "secret1", 1*time.Hour)
-	if err != nil {
-		t.Fatalf("CreateToken failed: %v", err)
-	}
-	_, err = VerifyToken(token, "secret2")
-	if err == nil {
-		t.Error("expected error for wrong secret")
-	}
-}
-
-func TestVerifyToken_Expired(t *testing.T) {
-	token, err := CreateToken("test@example.com", "secret", -1*time.Second)
-	if err != nil {
-		t.Fatalf("CreateToken failed: %v", err)
-	}
-	_, err = VerifyToken(token, "secret")
-	if err == nil {
-		t.Error("expected error for expired token")
-	}
-}
-
-func TestVerifyToken_InvalidBase64(t *testing.T) {
-	_, err := VerifyToken("!!!invalid!!!", "secret")
-	if err == nil {
-		t.Error("expected error for invalid base64")
-	}
-}
-
-func TestVerifyToken_TooShort(t *testing.T) {
-	_, err := VerifyToken("aGVsbG8=", "secret")
-	if err == nil {
-		t.Error("expected error for too-short token")
 	}
 }

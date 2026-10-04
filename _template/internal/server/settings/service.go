@@ -1,40 +1,8 @@
 package settings
 
 import (
-	"encoding/json"
-	"fmt"
-	"time"
-
 	"goph/internal/infrastructure"
 )
-
-const emailTokenTTL = 1 * time.Hour
-
-type emailConfirmData struct {
-	UserID string `json:"user_id"`
-	Email  string `json:"email"`
-}
-
-func CreateEmailConfirmToken(secretKey, userID, email string) (string, error) {
-	data := emailConfirmData{UserID: userID, Email: email}
-	payload, err := json.Marshal(data)
-	if err != nil {
-		return "", fmt.Errorf("marshal email confirm data: %w", err)
-	}
-	return infrastructure.CreateToken(string(payload), secretKey, emailTokenTTL)
-}
-
-func VerifyEmailConfirmToken(secretKey, token string) (*emailConfirmData, error) {
-	payload, err := infrastructure.VerifyToken(token, secretKey)
-	if err != nil {
-		return nil, err
-	}
-	var data emailConfirmData
-	if err := json.Unmarshal([]byte(payload), &data); err != nil {
-		return nil, fmt.Errorf("unmarshal email confirm data: %w", err)
-	}
-	return &data, nil
-}
 
 func SendConfirmationEmail(svc infrastructure.EmailService, to, confirmURL string) error {
 	if svc == nil {

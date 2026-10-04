@@ -4,10 +4,8 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-	"time"
 	"unicode"
 
-	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -79,28 +77,4 @@ func HashPassword(plain string) (string, error) {
 func CheckPassword(plain, hashed string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hashed), []byte(plain))
 	return err == nil
-}
-
-func CreateToken(data, secret string, ttl time.Duration) (string, error) {
-	claims := jwt.MapClaims{
-		"data": data,
-		"exp":  time.Now().Add(ttl).Unix(),
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(secret))
-}
-
-func VerifyToken(token, secret string) (string, error) {
-	claims := jwt.MapClaims{}
-	_, err := jwt.ParseWithClaims(token, claims, func(t *jwt.Token) (any, error) {
-		return []byte(secret), nil
-	})
-	if err != nil {
-		return "", err
-	}
-	data, _ := claims["data"].(string)
-	if data == "" {
-		return "", fmt.Errorf("invalid token")
-	}
-	return data, nil
 }

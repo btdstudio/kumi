@@ -4,12 +4,11 @@ import (
 	"context"
 	"net/http"
 	"strings"
-	"time"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/uptrace/bun"
 
 	"goph/internal/models"
+	"goph/internal/token"
 )
 
 type ContextKey string
@@ -18,19 +17,12 @@ const UserKey ContextKey = "user"
 const UserProfileKey ContextKey = "user_profile"
 const SessionCookieName = "session"
 
-type Claims struct {
-	Email       string `json:"email"`
-	DisplayName string `json:"display_name,omitempty"`
-	Theme       string `json:"theme,omitempty"`
-	jwt.RegisteredClaims
-}
-
-func UserFromContext(ctx context.Context) *Claims {
-	c, _ := ctx.Value(UserKey).(*Claims)
+func UserFromContext(ctx context.Context) *token.SessionClaims {
+	c, _ := ctx.Value(UserKey).(*token.SessionClaims)
 	return c
 }
 
-func ContextWithClaims(ctx context.Context, claims *Claims) context.Context {
+func ContextWithClaims(ctx context.Context, claims *token.SessionClaims) context.Context {
 	return context.WithValue(ctx, UserKey, claims)
 }
 
@@ -64,7 +56,7 @@ func LoadUserProfile(db *bun.DB) func(http.Handler) http.Handler {
 	}
 }
 
-func JWTAuth(secretKey string, secureCookies bool) func(http.Handler) http.Handler {
+func JWTAuth(tokens *token.Tokens, secureCookies bool) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			cookie, err := r.Cookie(SessionCookieName)
@@ -73,12 +65,8 @@ func JWTAuth(secretKey string, secureCookies bool) func(http.Handler) http.Handl
 				return
 			}
 
-			claims := &Claims{}
-			token, err := jwt.ParseWithClaims(cookie.Value, claims, func(t *jwt.Token) (interface{}, error) {
-				return []byte(secretKey), nil
-			}, jwt.WithLeeway(30*time.Second))
-
-			if err != nil || !token.Valid {
+			claims, err := tokens.VerifySession(token.SessionToken(cookie.Value))
+			if err != nil {
 				ClearSessionCookie(w, secureCookies)
 				next.ServeHTTP(w, r)
 				return
@@ -98,28 +86,6 @@ func RequireAuth(next http.Handler) http.Handler {
 		}
 		next.ServeHTTP(w, r)
 	})
-}
-
-func ClaimsFromUser(user *models.User) *Claims {
-	return &Claims{
-		Email:       user.Email,
-		DisplayName: user.DisplayName,
-		Theme:       user.Theme,
-		RegisteredClaims: jwt.RegisteredClaims{
-			Subject: user.ID,
-		},
-	}
-}
-
-func CreateSessionToken(secretKey string, claims *Claims) (string, error) {
-	now := time.Now()
-	claims.RegisteredClaims = jwt.RegisteredClaims{
-		Subject:   claims.Subject,
-		ExpiresAt: jwt.NewNumericDate(now.Add(14 * 24 * time.Hour)),
-		IssuedAt:  jwt.NewNumericDate(now),
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(secretKey))
 }
 
 func SetSessionCookie(w http.ResponseWriter, token string, secure bool) {

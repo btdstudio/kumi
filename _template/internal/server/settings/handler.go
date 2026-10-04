@@ -10,10 +10,12 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/uptrace/bun"
 
 	"goph/internal/infrastructure"
 	"goph/internal/models"
+	"goph/internal/token"
 	views "goph/internal/views/settings"
 	"goph/middleware"
 )
@@ -39,16 +41,16 @@ var themes = func() map[string]string {
 type Handler struct {
 	DB           *bun.DB
 	SQLDB        *sql.DB
-	SecretKey    string
+	Tokens       *token.Tokens
 	BaseURL      string
 	EmailService infrastructure.EmailService
 }
 
-func NewHandler(db *bun.DB, sqldb *sql.DB, secretKey, baseURL string, emailSvc infrastructure.EmailService) *Handler {
+func NewHandler(db *bun.DB, sqldb *sql.DB, tokens *token.Tokens, baseURL string, emailSvc infrastructure.EmailService) *Handler {
 	return &Handler{
 		DB:           db,
 		SQLDB:        sqldb,
-		SecretKey:    secretKey,
+		Tokens:       tokens,
 		BaseURL:      baseURL,
 		EmailService: emailSvc,
 	}
@@ -144,11 +146,18 @@ func (h *Handler) ProfilePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newToken, err := middleware.CreateSessionToken(h.SecretKey, middleware.ClaimsFromUser(user))
+	newToken, err := h.Tokens.IssueSession(token.SessionClaims{
+		Email:       user.Email,
+		DisplayName: user.DisplayName,
+		Theme:       user.Theme,
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject: user.ID,
+		},
+	})
 	if err != nil {
-		log.Printf("CreateSessionToken failed: %v (user.ID=%q user.Email=%q)", err, user.ID, user.Email)
+		log.Printf("IssueSession failed: %v (user.ID=%q user.Email=%q)", err, user.ID, user.Email)
 	} else {
-		middleware.SetSessionCookie(w, newToken, middleware.IsHTTPS(h.BaseURL))
+		middleware.SetSessionCookie(w, string(newToken), middleware.IsHTTPS(h.BaseURL))
 	}
 
 	w.Header().Set("HX-Redirect", "/settings/?flash=success&msg=Profile+updated.")
@@ -210,9 +219,9 @@ func (h *Handler) EmailPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := CreateEmailConfirmToken(h.SecretKey, user.ID, email)
+	confirmTok, err := h.Tokens.IssueEmailConfirm(user.ID, email)
 	if err == nil {
-		confirmURL := h.BaseURL + "/settings/confirm-email/" + token
+		confirmURL := h.BaseURL + "/settings/confirm-email/" + string(confirmTok)
 		SendConfirmationEmail(h.EmailService, email, confirmURL)
 	}
 
@@ -221,9 +230,9 @@ func (h *Handler) EmailPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) ConfirmEmail(w http.ResponseWriter, r *http.Request) {
-	token := chi.URLParam(r, "token")
+	tokenStr := chi.URLParam(r, "token")
 
-	data, err := VerifyEmailConfirmToken(h.SecretKey, token)
+	data, err := h.Tokens.VerifyEmailConfirm(token.EmailConfirmToken(tokenStr))
 	if err != nil || data == nil {
 		views.ConfirmEmail(false, "This confirmation link is invalid or has expired. Please request a new one.").Render(r.Context(), w)
 		return
@@ -332,9 +341,9 @@ func (h *Handler) ThemePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	claims.Theme = theme
-	newToken, err := middleware.CreateSessionToken(h.SecretKey, claims)
+	newToken, err := h.Tokens.IssueSession(*claims)
 	if err == nil {
-		middleware.SetSessionCookie(w, newToken, middleware.IsHTTPS(h.BaseURL))
+		middleware.SetSessionCookie(w, string(newToken), middleware.IsHTTPS(h.BaseURL))
 	}
 
 	w.Header().Set("HX-Trigger", "theme-updated")

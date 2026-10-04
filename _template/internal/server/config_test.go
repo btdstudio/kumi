@@ -1,7 +1,6 @@
 package server
 
 import (
-	"bytes"
 	"strings"
 	"testing"
 )
@@ -53,19 +52,5 @@ func TestValidateBaseURL(t *testing.T) {
 				t.Errorf("validateBaseURL(%q) = %q, want %q", tt.in, got, tt.want)
 			}
 		})
-	}
-}
-
-func TestDeriveKey(t *testing.T) {
-	secret := strings.Repeat("a", 32)
-	a := deriveKey(secret, "csrf")
-	if !bytes.Equal(a, deriveKey(secret, "csrf")) {
-		t.Error("deriveKey is not deterministic")
-	}
-	if bytes.Equal(a, deriveKey(secret, "other")) {
-		t.Error("different purposes must yield different keys")
-	}
-	if bytes.Equal(a, []byte(secret)) {
-		t.Error("derived key must differ from the secret")
 	}
 }
