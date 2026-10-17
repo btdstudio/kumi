@@ -1,0 +1,136 @@
+package settings
+
+import "goph/internal/views"
+
+type ThemeOption struct {
+	Key   string
+	Label string
+}
+
+templ IndexPage(displayName, email, pendingEmail, avatarURL, theme string, themeOptions []ThemeOption, csrfToken, flash, msg string) {
+	@views.Base("Settings — goph", "Settings", "dark", theme, displayName, email, avatarURL, csrfToken, "", true) {
+		if flash != "" && msg != "" {
+			<div class={ "alert alert-", flash, " alert-dismissible fade show" } role="alert">
+				{ msg }
+				<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+			</div>
+		}
+		if pendingEmail != "" {
+			<div class="alert alert-info d-flex align-items-center gap-2" role="alert">
+				<i class="bi bi-envelope-check fs-5"></i>
+				{ "Confirm your new email " }<strong>{ pendingEmail }</strong>{ " for a confirmation link." }
+			</div>
+		}
+		<div class="row g-4">
+			<div class="col-12 col-lg-6">
+				<section class="card mb-4">
+					<div class="card-header"><i class="bi bi-person me-2"></i>Profile</div>
+					<div class="card-body">
+						<form method="POST" action="/settings/profile" enctype="multipart/form-data"
+							hx-post="/settings/profile" hx-target="#profile-error" hx-swap="innerHTML"
+							hx-encoding="multipart/form-data">
+							<input type="hidden" name="csrf_token" value={ csrfToken }/>
+							<div class="mb-3">
+								<label for="display_name" class="form-label">Display name</label>
+								<input type="text" class="form-control" id="display_name" name="display_name"
+									value={ displayName } maxlength="100"/>
+							</div>
+							<div class="mb-3">
+								<label for="avatar" class="form-label">Avatar</label>
+								<input type="file" class="form-control" id="avatar" name="avatar" accept="image/*"/>
+								<div class="form-text">Max 5 MB. Will be stored as base64.</div>
+							</div>
+							<div id="profile-error"></div>
+							<button type="submit" class="btn btn-primary">Save profile</button>
+						</form>
+					</div>
+				</section>
+				<section class="card mb-4">
+					<div class="card-header"><i class="bi bi-palette me-2"></i>Theme</div>
+					<div class="card-body">
+						<form method="POST" action="/settings/theme"
+							hx-post="/settings/theme" hx-swap="none"
+							hx-trigger="change">
+							<input type="hidden" name="csrf_token" value={ csrfToken }/>
+							<select name="theme" class="form-select" aria-label="Select theme">
+								for _, opt := range themeOptions {
+									if opt.Key == theme {
+										<option value={ opt.Key } selected>{ opt.Label }</option>
+									} else {
+										<option value={ opt.Key }>{ opt.Label }</option>
+									}
+								}
+							</select>
+							<div class="form-text mt-2">Changes apply immediately via live preview.</div>
+						</form>
+					</div>
+				</section>
+				<section class="card mb-4 border-danger">
+					<div class="card-header text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Danger zone</div>
+					<div class="card-body">
+						<p class="text-muted small">Permanently delete your account and all associated data. This action cannot be undone.</p>
+						<form method="POST" action="/settings/delete"
+							hx-post="/settings/delete" hx-target="#delete-error" hx-swap="innerHTML">
+							<input type="hidden" name="csrf_token" value={ csrfToken }/>
+							<div class="mb-3">
+								<label for="delete-confirm" class="form-label">Type <code>DELETE</code> to confirm</label>
+								<input type="text" class="form-control" id="delete-confirm" name="confirm" required pattern="DELETE" autocomplete="off"/>
+							</div>
+							<div class="mb-3">
+								<label for="delete-password" class="form-label">Current password</label>
+								<input type="password" class="form-control" id="delete-password" name="password" required autocomplete="new-password"/>
+							</div>
+							<div id="delete-error"></div>
+							<button type="submit" class="btn btn-danger">Delete my account</button>
+						</form>
+					</div>
+				</section>
+			</div>
+			<div class="col-12 col-lg-6">
+				<section class="card mb-4">
+					<div class="card-header"><i class="bi bi-envelope me-2"></i>Email address</div>
+					<div class="card-body">
+						<p class="text-muted small mb-3">Current: <strong>{ email }</strong></p>
+						<form method="POST" action="/settings/email"
+							hx-post="/settings/email" hx-target="#email-error" hx-swap="innerHTML">
+							<input type="hidden" name="csrf_token" value={ csrfToken }/>
+							<div class="mb-3">
+								<label for="new-email" class="form-label">New email</label>
+								<input type="text" class="form-control" id="new-email" name="email" inputmode="email" required autocomplete="off"/>
+							</div>
+							<div class="mb-3">
+								<label for="email-password" class="form-label">Current password</label>
+								<input type="password" class="form-control" id="email-password" name="password" autocomplete="new-password" required/>
+							</div>
+							<div id="email-error"></div>
+							<button type="submit" class="btn btn-primary">Change email</button>
+						</form>
+					</div>
+				</section>
+				<section class="card mb-4">
+					<div class="card-header"><i class="bi bi-lock me-2"></i>Password</div>
+					<div class="card-body">
+						<form method="POST" action="/settings/password"
+							hx-post="/settings/password" hx-target="#password-error" hx-swap="innerHTML">
+							<input type="hidden" name="csrf_token" value={ csrfToken }/>
+							<div class="mb-3">
+								<label for="current_password" class="form-label">Current password</label>
+								<input type="password" class="form-control" id="current_password" name="current_password" autocomplete="off" required/>
+							</div>
+							<div class="mb-3">
+								<label for="new_password" class="form-label">New password</label>
+								<input type="password" class="form-control" id="new_password" name="new_password" minlength="12" autocomplete="new-password" required/>
+							</div>
+							<div class="mb-3">
+								<label for="confirm_password" class="form-label">Confirm new password</label>
+								<input type="password" class="form-control" id="confirm_password" name="confirm_password" minlength="6" autocomplete="new-password" required/>
+							</div>
+							<div id="password-error"></div>
+							<button type="submit" class="btn btn-primary">Change password</button>
+						</form>
+					</div>
+				</section>
+			</div>
+		</div>
+	}
+}
