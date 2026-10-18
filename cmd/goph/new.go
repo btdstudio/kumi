@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/briantimmer/goph"
-	"github.com/briantimmer/goph/internal/scaffold"
+	"github.com/btdstudio/goph"
+	"github.com/btdstudio/goph/internal/scaffold"
 	"github.com/spf13/cobra"
 )
 
