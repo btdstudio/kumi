@@ -5,7 +5,7 @@ import (
 	"os/exec"
 	"testing"
 
-	goph "github.com/briantimmer/goph"
+	goph "github.com/btdstudio/goph"
 )
 
 func skipOrFail(t *testing.T, format string, args ...any) {
