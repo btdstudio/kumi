@@ -6,8 +6,8 @@ import (
 
 	"github.com/uptrace/bun"
 
-	"goph/internal/views"
-	"goph/middleware"
+	"kumi/internal/views"
+	"kumi/middleware"
 )
 
 type Handler struct {
@@ -77,6 +77,6 @@ func (h *Handler) userPageData(r *http.Request, title, pageTitle, navExtraClass 
 }
 
 func (h *Handler) DashboardPage(w http.ResponseWriter, r *http.Request) {
-	data := h.userPageData(r, "Dashboard — goph", "Dashboard", " active")
+	data := h.userPageData(r, "Dashboard — kumi", "Dashboard", " active")
 	renderPage(w, r, data)
 }

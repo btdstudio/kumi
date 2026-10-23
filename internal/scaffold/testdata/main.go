@@ -1,5 +1,5 @@
 package main
 
 import (
-	"goph/internal/server"
+	"kumi/internal/server"
 )

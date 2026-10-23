@@ -7,8 +7,8 @@ import (
 
 	"github.com/uptrace/bun"
 
-	"goph/internal/models"
-	"goph/internal/token"
+	"kumi/internal/models"
+	"kumi/internal/token"
 )
 
 type ContextKey string

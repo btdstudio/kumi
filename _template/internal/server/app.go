@@ -12,13 +12,13 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/uptrace/bun"
 
-	"goph/db"
-	"goph/internal/infrastructure"
-	"goph/internal/server/auth"
-	"goph/internal/server/dashboard"
-	"goph/internal/server/settings"
-	"goph/internal/token"
-	"goph/middleware"
+	"kumi/db"
+	"kumi/internal/infrastructure"
+	"kumi/internal/server/auth"
+	"kumi/internal/server/dashboard"
+	"kumi/internal/server/settings"
+	"kumi/internal/token"
+	"kumi/middleware"
 )
 
 type App struct {

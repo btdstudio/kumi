@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/btdstudio/goph"
-	"github.com/btdstudio/goph/internal/scaffold"
+	"github.com/btdstudio/kumi"
+	"github.com/btdstudio/kumi/internal/scaffold"
 	"github.com/spf13/cobra"
 )
 
@@ -24,8 +24,8 @@ Go + HTMX + Bootstrap 5 + Catppuccin web application into it.
 [module-path] is the Go module path (default: <name>).
 
 Examples:
-  goph new myapp
-  goph new myapp github.com/user/myapp`,
+  kumi new myapp
+  kumi new myapp github.com/user/myapp`,
 	Args: cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
@@ -48,7 +48,7 @@ Examples:
 		}
 
 		fmt.Printf("  Scaffolding %q into %s ...\n", moduleName, targetDir)
-		if err := scaffold.Scaffold(goph.TemplateFS, targetDir, moduleName); err != nil {
+		if err := scaffold.Scaffold(kumi.TemplateFS, targetDir, moduleName); err != nil {
 			return fmt.Errorf("scaffold: %w", err)
 		}
 
@@ -72,8 +72,8 @@ Examples:
 		fmt.Println("  Done! To get started:")
 		fmt.Println()
 		fmt.Printf("    cd %s\n", name)
-		fmt.Println("    goph db migrate    # run database migrations")
-		fmt.Println("    goph dev           # start development server")
+		fmt.Println("    kumi db migrate    # run database migrations")
+		fmt.Println("    kumi dev           # start development server")
 		fmt.Println()
 		return nil
 	},

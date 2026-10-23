@@ -13,11 +13,11 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/uptrace/bun"
 
-	"goph/internal/infrastructure"
-	"goph/internal/models"
-	"goph/internal/token"
-	views "goph/internal/views/settings"
-	"goph/middleware"
+	"kumi/internal/infrastructure"
+	"kumi/internal/models"
+	"kumi/internal/token"
+	views "kumi/internal/views/settings"
+	"kumi/middleware"
 )
 
 var themeOptions = []views.ThemeOption{

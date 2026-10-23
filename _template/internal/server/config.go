@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"goph/middleware"
+	"kumi/middleware"
 )
 
 const minSecretKeyLength = 32

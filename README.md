@@ -1,31 +1,31 @@
-# goph
+# kumi
 
 Scaffold production-ready Go + HTMX + Bootstrap 5 + Catppuccin (plus other themes) web applications.
 
 ## Install
 
 ```bash
-go install github.com/btdstudio/goph/cmd/goph@latest
+go install github.com/btdstudio/kumi/cmd/kumi@latest
 ```
 
 ### Keeping it updated
 To get the latest bugfixes and features, simply re-run:
 ```bash
-go install github.com/btdstudio/goph/cmd/goph@latest
+go install github.com/btdstudio/kumi/cmd/kumi@latest
 ```
 
 ### Shell Path Setup
-If the `goph` command is not recognized after running the installation, make sure Go's binary directory is added to your shell's `$PATH` variable:
+If the `kumi` command is not recognized after running the installation, make sure Go's binary directory is added to your shell's `$PATH` variable:
 
 ```bash
 # Add Go binary path to Zsh profile (macOS default):
 echo 'export PATH=$PATH:$(go env GOPATH)/bin' >> ~/.zshrc && source ~/.zshrc
 ```
 
-After installing, run `goph doctor` to check and install required tools ([templ](https://github.com/a-h/templ), [air](https://github.com/air-verse/air), [goose](https://github.com/pressly/goose)):
+After installing, run `kumi doctor` to check and install required tools ([templ](https://github.com/a-h/templ), [air](https://github.com/air-verse/air), [goose](https://github.com/pressly/goose)):
 
 ```bash
-goph doctor --install
+kumi doctor --install
 ```
 
 ## Usage
@@ -33,8 +33,8 @@ goph doctor --install
 ### Scaffold a new project
 
 ```bash
-goph new myapp
-goph new myapp github.com/user/myapp
+kumi new myapp
+kumi new myapp github.com/user/myapp
 ```
 
 This creates a project directory with auth (email/password, JWT sessions, password reset), dashboard, settings (profile/email/theme/delete account), and a full Catppuccin-themed UI with HTMX.
@@ -68,22 +68,22 @@ The app automatically loads `.env` at startup. Required vars:
 
 ```bash
 cd myapp
-goph db migrate
+kumi db migrate
 ```
 
 ### Start development server
 
 ```bash
-goph dev
+kumi dev
 ```
 
-Starts air with hot-reload on port 8080. Both `goph db migrate` and `goph dev` read the same environment — set vars in `.env` or export them.
+Starts air with hot-reload on port 8080. Both `kumi db migrate` and `kumi dev` read the same environment — set vars in `.env` or export them.
 
 ### Inside a generated project
 
 ```bash
-goph db migrate  # goose up
-goph dev         # air hot-reload server
+kumi db migrate  # goose up
+kumi dev         # air hot-reload server
 ```
 
 ### Git hooks

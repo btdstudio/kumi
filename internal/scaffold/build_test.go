@@ -5,7 +5,7 @@ import (
 	"os/exec"
 	"testing"
 
-	goph "github.com/btdstudio/goph"
+	kumi "github.com/btdstudio/kumi"
 )
 
 func skipOrFail(t *testing.T, format string, args ...any) {
@@ -22,7 +22,7 @@ func TestScaffold_TemplateBuilds(t *testing.T) {
 	}
 
 	dir := t.TempDir()
-	if err := Scaffold(goph.TemplateFS, dir, "example.com/app"); err != nil {
+	if err := Scaffold(kumi.TemplateFS, dir, "example.com/app"); err != nil {
 		t.Fatalf("Scaffold failed: %v", err)
 	}
 

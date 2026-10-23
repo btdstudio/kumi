@@ -1,6 +1,6 @@
 package settings
 
-import "goph/internal/views"
+import "kumi/internal/views"
 
 type ThemeOption struct {
 	Key   string
@@ -8,7 +8,7 @@ type ThemeOption struct {
 }
 
 templ IndexPage(displayName, email, pendingEmail, avatarURL, theme string, themeOptions []ThemeOption, csrfToken, flash, msg string) {
-	@views.Base("Settings — goph", "Settings", "dark", theme, displayName, email, avatarURL, csrfToken, "", true) {
+	@views.Base("Settings — kumi", "Settings", "dark", theme, displayName, email, avatarURL, csrfToken, "", true) {
 		if flash != "" && msg != "" {
 			<div class={ "alert alert-", flash, " alert-dismissible fade show" } role="alert">
 				{ msg }

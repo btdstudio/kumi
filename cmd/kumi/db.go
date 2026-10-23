@@ -27,12 +27,12 @@ var migrateCmd = &cobra.Command{
 	Long: `Runs goose database migrations (goose up) in the specified directory
 or the current directory.
 
-This command should be run inside a goph-generated project after
+This command should be run inside a kumi-generated project after
 setting up the database.
 
 Examples:
-  goph db migrate
-  goph db migrate /path/to/project`,
+  kumi db migrate
+  kumi db migrate /path/to/project`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		dir := "."
@@ -65,7 +65,7 @@ Examples:
 		}
 
 		if !findBinary("goose") {
-			return fmt.Errorf("goose not found — run 'goph doctor --install' or 'go install github.com/pressly/goose/v3/cmd/goose@latest'")
+			return fmt.Errorf("goose not found — run 'kumi doctor --install' or 'go install github.com/pressly/goose/v3/cmd/goose@latest'")
 		}
 
 		fmt.Printf("  Running goose %s up in %s ...\n", driver, migrationsDir)

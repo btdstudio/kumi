@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for your interest in contributing to goph! 
+Thank you for your interest in contributing to kumi! 
 
 ## Getting Started
 - Fork the repository on GitHub.

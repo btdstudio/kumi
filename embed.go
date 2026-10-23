@@ -1,4 +1,4 @@
-package goph
+package kumi
 
 import "embed"
 
