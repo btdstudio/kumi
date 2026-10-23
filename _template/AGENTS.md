@@ -1,4 +1,4 @@
-# goph scaffolded web app
+# kumi scaffolded web app
 
 ## Stack
 

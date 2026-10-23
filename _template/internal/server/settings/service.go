@@ -1,7 +1,7 @@
 package settings
 
 import (
-	"goph/internal/infrastructure"
+	"kumi/internal/infrastructure"
 )
 
 func SendConfirmationEmail(svc infrastructure.EmailService, to, confirmURL string) error {

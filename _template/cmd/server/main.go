@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"goph/internal/server"
+	"kumi/internal/server"
 )
 
 func main() {

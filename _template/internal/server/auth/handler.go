@@ -10,11 +10,11 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/uptrace/bun"
 
-	"goph/internal/infrastructure"
-	"goph/internal/models"
-	"goph/internal/token"
-	"goph/internal/views/auth"
-	"goph/middleware"
+	"kumi/internal/infrastructure"
+	"kumi/internal/models"
+	"kumi/internal/token"
+	"kumi/internal/views/auth"
+	"kumi/middleware"
 )
 
 type Handler struct {
@@ -202,7 +202,7 @@ func (h *Handler) ForgotPasswordPost(w http.ResponseWriter, r *http.Request) {
 			h.Log.Printf("failed to create reset token: %v", tokErr)
 		} else if h.EmailService != nil {
 			resetURL := h.BaseURL + "/auth/reset-password?token=" + string(resetTok)
-			if sendErr := h.EmailService.Send(user.Email, "Reset your goph password",
+			if sendErr := h.EmailService.Send(user.Email, "Reset your kumi password",
 				"<p>Click the link below to reset your password. This link expires in 1 hour.</p>"+
 					"<p><a href=\""+resetURL+"\">"+resetURL+"</a></p>"+
 					"<p>If you didn't request this, you can safely ignore this email.</p>",

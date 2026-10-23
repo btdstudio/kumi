@@ -8,8 +8,8 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 
-	"goph/internal/token"
-	"goph/middleware"
+	"kumi/internal/token"
+	"kumi/middleware"
 )
 
 func TestDashboardPage_Unauthenticated(t *testing.T) {

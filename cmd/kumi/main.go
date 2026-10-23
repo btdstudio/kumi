@@ -12,9 +12,9 @@ import (
 var Version = "dev"
 
 var rootCmd = &cobra.Command{
-	Use:   "goph",
+	Use:   "kumi",
 	Short: "Scaffold Go + HTMX + Bootstrap 5 + Catppuccin web applications",
-	Long: `goph is a CLI tool that scaffolds production-ready Go web applications
+	Long: `kumi is a CLI tool that scaffolds production-ready Go web applications
 with HTMX, Bootstrap 5, and Catppuccin theming.`,
 }
 

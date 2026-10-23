@@ -27,8 +27,8 @@ func TestScaffold_NoModuleSubstitution(t *testing.T) {
 	if !strings.Contains(content, "module example.com/app") {
 		t.Errorf("expected 'module example.com/app' in go.mod, got:\n%s", content)
 	}
-	if strings.Contains(content, "goph") {
-		t.Errorf("go.mod should not contain 'goph':\n%s", content)
+	if strings.Contains(content, "kumi") {
+		t.Errorf("go.mod should not contain 'kumi':\n%s", content)
 	}
 }
 
@@ -44,8 +44,8 @@ func TestScaffold_ImportReplacement(t *testing.T) {
 		t.Fatalf("main.go not found: %v", err)
 	}
 	content := string(b)
-	if strings.Contains(content, `"goph/`) {
-		t.Errorf("main.go should not contain 'goph/' import:\n%s", content)
+	if strings.Contains(content, `"kumi/`) {
+		t.Errorf("main.go should not contain 'kumi/' import:\n%s", content)
 	}
 	if !strings.Contains(content, `"example.com/app/internal/server"`) {
 		t.Errorf("expected updated import in main.go:\n%s", content)

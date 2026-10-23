@@ -54,15 +54,15 @@ func ScaffoldRoot(fsys embed.FS, root, targetDir, moduleName string) error {
 				return err
 			}
 			processed := buf.String()
-			processed = strings.ReplaceAll(processed, "goph/", moduleName+"/")
-			processed = strings.ReplaceAll(processed, "module goph", "module "+moduleName)
+			processed = strings.ReplaceAll(processed, "kumi/", moduleName+"/")
+			processed = strings.ReplaceAll(processed, "module kumi", "module "+moduleName)
 			return os.WriteFile(targetPath, []byte(processed), 0644)
 		}
 
 		ext := filepath.Ext(relPath)
 		if ext == ".go" || ext == ".templ" {
 			contentStr := string(content)
-			contentStr = strings.ReplaceAll(contentStr, "\"goph/", "\""+moduleName+"/")
+			contentStr = strings.ReplaceAll(contentStr, "\"kumi/", "\""+moduleName+"/")
 			return os.WriteFile(targetPath, []byte(contentStr), 0644)
 		}
 

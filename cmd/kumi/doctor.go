@@ -29,7 +29,7 @@ func init() {
 var doctorCmd = &cobra.Command{
 	Use:   "doctor",
 	Short: "Check and install required tools",
-	Long: `Checks that all tools required by goph projects are installed.
+	Long: `Checks that all tools required by kumi projects are installed.
 
 If --install is given, missing tools are automatically installed
 via 'go install'.`,
@@ -58,7 +58,7 @@ via 'go install'.`,
 		if !allFound {
 			if !install {
 				fmt.Println()
-				fmt.Println("  Run 'goph doctor --install' to install missing tools.")
+				fmt.Println("  Run 'kumi doctor --install' to install missing tools.")
 			}
 			os.Exit(1)
 		}
