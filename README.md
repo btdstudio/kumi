@@ -1,4 +1,4 @@
-# kumi
+# Kumi (組) 🧩
 
 Scaffold production-ready Go + HTMX + Bootstrap 5 + Catppuccin (plus other themes) web applications.
 
