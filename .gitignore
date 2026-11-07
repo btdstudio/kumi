@@ -4,9 +4,6 @@
 # Temp
 tmp/
 
-# Plans
-.plans/
-
 # OS
 .DS_Store
 Thumbs.db
@@ -28,5 +25,3 @@ Thumbs.db
 .env
 .env.local
 
-# Tomo workspace
-.tomo/
