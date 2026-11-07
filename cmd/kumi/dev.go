@@ -41,7 +41,7 @@ Examples:
 			return fmt.Errorf("no .air.toml found at %s (not a kumi project?)", absDir)
 		}
 
-		if !findBinary("air") {
+		if findBinary("air") == "" {
 			return fmt.Errorf("air not found — run 'kumi doctor --install' or 'go install github.com/air-verse/air@latest'")
 		}
 
