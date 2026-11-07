@@ -64,7 +64,7 @@ Examples:
 			return fmt.Errorf("neither GOOSE_DBSTRING nor DATABASE_URL is set")
 		}
 
-		if !findBinary("goose") {
+		if findBinary("goose") == "" {
 			return fmt.Errorf("goose not found — run 'kumi doctor --install' or 'go install github.com/pressly/goose/v3/cmd/goose@latest'")
 		}
 

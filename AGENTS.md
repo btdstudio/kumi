@@ -5,7 +5,7 @@
 - `cmd/kumi/main.go` — root cobra command
 - `cmd/kumi/new.go` — `kumi new <name> [module-path]`: scaffolds project from `_template/`
 - `cmd/kumi/dev.go` — `kumi dev [dir]`: starts air hot-reload
-- `cmd/kumi/doctor.go` — `kumi doctor [--install]`: checks/installs templ, air, goose
+- `cmd/kumi/doctor.go` — `kumi doctor [--install]`: checks/installs templ, air, goose; templ must match the version in `_template/go.mod.tmpl`
 - `cmd/kumi/db.go` — `kumi db migrate [dir]`: runs goose migrations
 
 ## Scaffolding
