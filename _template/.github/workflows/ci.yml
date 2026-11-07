@@ -39,7 +39,7 @@ jobs:
           cache: true
 
       - name: Install templ
-        run: go install github.com/a-h/templ/cmd/templ@v0.3.1020
+        run: go install "github.com/a-h/templ/cmd/templ@$(go list -m -f '{{.Version}}' github.com/a-h/templ)"
 
       - name: Generate templ views
         run: templ generate

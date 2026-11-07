@@ -53,7 +53,7 @@ Examples:
 		}
 
 		if err := scaffold.TemplGenerate(targetDir); err != nil {
-			return fmt.Errorf("templ generate: %w (install with 'go install github.com/a-h/templ/cmd/templ@latest')", err)
+			return fmt.Errorf("templ generate: %w (install with 'kumi doctor --install')", err)
 		}
 
 		fmt.Println("  Running go mod tidy ...")
